@@ -1,61 +1,3 @@
-<!-- <script>
-    window.onload = function() {
-    render()
-}
-
-const firebaseConfig = {
-    apiKey: "AIzAsyBiVvS8QHo1kINQqdyg7YMZ-il5kNMeI3hfE",
-    authDomain: "login-f0577.firebaseapp.com",
-    projectId: "login-f0577",
-    storageBucket: "login-f0577.appspot.com",
-    messagingSenderId: "486293576773",
-    appId: "1:486293576773:web:e46268abbd5554df06140c"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
-
-function render() {
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
-    recaptchaVerifier.render();
-}
-
-
-function login() {
-    var mobile = document.getElementById("mobilenum").value
-    console.log(mobile)
-    var number = "+91" + mobile;
-    console.log(number)
-    if (mobile.length < 10) {
-        window.alert("Enter correct mobile number")
-    } else {
-        firebase.auth().signInWithPhoneNumber(number, window.recaptchaVerifier).then(function (confirmResult) {
-            window.confirmResult = confirmResult;
-            coderesult = confirmResult;
-            console.log(coderesult);
-
-            var a = document.getElementById("mobileenter")
-            a.remove();
-
-            document.getElementById("optenter").style.visibility = "visible";
-        }).catch(function (error) {
-            document.getElementById("error").innerHTML = error.message;
-        });
-    }
-}
-
-function verify() {
-    var otp = document.getElementById("otpvalue").value;
-    coderesult.confirm(otp).then(function (result) {
-        var user = result.user;
-        window.location.replace("user.html");
-    }).catch(function (error) {
-        document.getElementById("errorotp").innerHTML = error.message;
-    });
-}
-</script> -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,34 +38,32 @@ function verify() {
     </div>
     
     <script>
+        let coderesult; // Moved coderesult declaration here
+
         window.onload = function() {
             render();
         }
 
         const firebaseConfig = {
-  apiKey: "AIzaSyBMIXxBISZnryQeOgKRs73TqVRXkshd0KM",
-  authDomain: "krinkin-309ee.firebaseapp.com",
-  projectId: "krinkin-309ee",
-  storageBucket: "krinkin-309ee.appspot.com",
-  messagingSenderId: "397386970252",
-  appId: "1:397386970252:web:9655f412b4280a036d77a9"
-};
+            apiKey: "AIzaSyBMIXxBISZnryQeOgKRs73TqVRXkshd0KM",
+            authDomain: "krinkin-309ee.firebaseapp.com",
+            projectId: "krinkin-309ee",
+            storageBucket: "krinkin-309ee.appspot.com",
+            messagingSenderId: "397386970252",
+            appId: "1:397386970252:web:9655f412b4280a036d77a9"
+        };
 
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
 
         function render() {
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        'size': 'invisible', // This makes it invisible
-        'callback': function(response) {
-            // reCAPTCHA solved automatically
-            login();
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                'size': 'invisible', 
+                'callback': function(response) {
+                    login(); // Automatically call login if recaptcha is solved
+                }
+            });
+            recaptchaVerifier.render();
         }
-    });
-    recaptchaVerifier.render();
-}
-
 
         function login() {
             var mobile = document.getElementById("mobilenum").value;
@@ -132,7 +72,7 @@ function verify() {
                 window.alert("Enter correct mobile number");
             } else {
                 firebase.auth().signInWithPhoneNumber(number, window.recaptchaVerifier).then(function (confirmResult) {
-                    window.confirmResult = confirmResult;
+                    coderesult = confirmResult; // Properly assign the confirmResult to coderesult
                     document.getElementById("mobileenter").remove();
                     document.getElementById("optenter").style.visibility = "visible";
                 }).catch(function (error) {
@@ -143,12 +83,16 @@ function verify() {
 
         function verify() {
             var otp = document.getElementById("otpvalue").value;
-            coderesult.confirm(otp).then(function (result) {
-                var user = result.user;
-                window.location.replace("user.html");
-            }).catch(function (error) {
-                document.getElementById("errorotp").innerHTML = error.message;
-            });
+            if (coderesult) {
+                coderesult.confirm(otp).then(function (result) {
+                    var user = result.user;
+                    window.location.replace("user.html");
+                }).catch(function (error) {
+                    document.getElementById("errorotp").innerHTML = error.message;
+                });
+            } else {
+                document.getElementById("errorotp").innerHTML = "OTP verification error. Please retry.";
+            }
         }
     </script>
 </body>
