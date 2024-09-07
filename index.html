@@ -26,7 +26,7 @@
       
 
     <!-- Firebase SDKs -->
-    <!-- Add Firebase SDK -->
+ <!-- Add Firebase SDK -->
 <script type="module">
     // Import Firebase app and auth
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -46,17 +46,22 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
   
+    let recaptchaVerifier; // Declare recaptchaVerifier outside the event listener
+  
     // Sending OTP
     document.getElementById("sendOtpBtn").addEventListener("click", function() {
       const phoneNumber = document.getElementById("phoneNumber").value;
-      const recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-        size: 'invisible',
-        callback: function(response) {
+      
+      // Initialize the RecaptchaVerifier
+      recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+        'size': 'invisible', // Use 'normal' for visible reCAPTCHA or 'invisible' for auto-validation
+        'callback': (response) => {
           // reCAPTCHA solved, allow send OTP
           sendOtp(phoneNumber);
         }
-      });
+      }, auth);
   
+      // Render reCAPTCHA
       recaptchaVerifier.render().then(function(widgetId) {
         window.recaptchaWidgetId = widgetId;
       });
@@ -68,7 +73,8 @@
             window.confirmationResult = confirmationResult;
             document.getElementById("phone-form").style.display = "none";
             document.getElementById("otp-form").style.display = "block";
-          }).catch(function(error) {
+          })
+          .catch(function(error) {
             document.getElementById("result").innerText = "Error: " + error.message;
           });
       }
@@ -82,11 +88,13 @@
           // User signed in successfully.
           const user = result.user;
           document.getElementById("result").innerText = "OTP Verified. User: " + user.phoneNumber;
-        }).catch(function(error) {
+        })
+        .catch(function(error) {
           document.getElementById("result").innerText = "Error: " + error.message;
         });
     });
   </script>
+  
   
 </body>
 </html>
