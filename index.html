@@ -86,7 +86,8 @@
             if (coderesult) {
                 coderesult.confirm(otp).then(function (result) {
                     var user = result.user;
-                    window.location.replace("user.html");
+                    // window.location.replace("user.html");
+                    console.log("Otp verified")
                 }).catch(function (error) {
                     document.getElementById("errorotp").innerHTML = error.message;
                 });
