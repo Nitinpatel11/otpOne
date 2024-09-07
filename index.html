@@ -9,22 +9,21 @@
     <h1>Firebase OTP Authentication</h1>
 
     <!-- Input fields for phone number and OTP -->
-    <div>
-        <label for="phoneNumber">Phone Number:</label>
-        <input type="text" id="phoneNumber" placeholder="+1234567890">
-        <button id="sendOtpBtn">Send OTP</button>
-    </div>
-
-    <div>
+    <form id="phone-form">
+        <label for="phoneNumber">Enter Phone Number:</label>
+        <input type="text" id="phoneNumber" placeholder="+911234567890" required>
+        <button type="button" id="sendOtpBtn">Send OTP</button>
+      </form>
+      
+      <form id="otp-form" style="display:none;">
         <label for="otp">Enter OTP:</label>
-        <input type="text" id="otp" placeholder="123456">
-        <button id="verifyOtpBtn">Verify OTP</button>
-    </div>
-
-    <p id="status"></p>
-
-    <!-- Invisible reCAPTCHA container -->
-    <div id="recaptcha-container"></div>
+        <input type="text" id="otp" placeholder="123456" required>
+        <button type="button" id="verifyOtpBtn">Verify OTP</button>
+      </form>
+      
+      <div id="recaptcha-container"></div>
+      <div id="result"></div>
+      
 
     <!-- Firebase SDKs -->
     <script type="module">
@@ -33,13 +32,12 @@
 
         // Firebase configuration
         const firebaseConfig = {
-  apiKey: "AIzaSyC7P-NRlZ9LraOl_Ne_bauSbeNerHnorXk",
-  authDomain: "sendotp-7249b.firebaseapp.com",
-  projectId: "sendotp-7249b",
-  storageBucket: "sendotp-7249b.appspot.com",
-  messagingSenderId: "16941523513",
-  appId: "1:16941523513:web:069bea4ac45196365f23e8",
-  measurementId: "G-21ZG0QGJ7K"
+  apiKey: "AIzaSyBMIXxBISZnryQeOgKRs73TqVRXkshd0KM",
+  authDomain: "krinkin-309ee.firebaseapp.com",
+  projectId: "krinkin-309ee",
+  storageBucket: "krinkin-309ee.appspot.com",
+  messagingSenderId: "397386970252",
+  appId: "1:397386970252:web:d6bdefc39cf239c56d77a9"
 };
 
         // Initialize Firebase
@@ -47,63 +45,45 @@
         const auth = getAuth(app);
 
         // Setup reCAPTCHA
-        const appVerifier = new RecaptchaVerifier('recaptcha-container', {
-            'size': 'invisible',
-            'callback': (response) => {
-                // reCAPTCHA solved, proceed with OTP sending
-            }
-        }, auth);
+        document.getElementById("sendOtpBtn").addEventListener("click", function() {
+  const phoneNumber = document.getElementById("phoneNumber").value;
+  const recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+    size: 'invisible',
+    callback: function(response) {
+      // reCAPTCHA solved, allow send OTP
+      sendOtp(phoneNumber);
+    }
+  });
 
-        appVerifier.render();
+  recaptchaVerifier.render().then(function(widgetId) {
+    window.recaptchaWidgetId = widgetId;
+  });
 
-        // DOM elements
-        const phoneNumberInput = document.getElementById('phoneNumber');
-        const otpInput = document.getElementById('otp');
-        const sendOtpBtn = document.getElementById('sendOtpBtn');
-        const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-        const statusText = document.getElementById('status');
+  function sendOtp(phoneNumber) {
+    firebase.auth().signInWithPhoneNumber(phoneNumber, recaptchaVerifier)
+      .then(function(confirmationResult) {
+        // SMS sent. Prompt user to enter OTP.
+        window.confirmationResult = confirmationResult;
+        document.getElementById("phone-form").style.display = "none";
+        document.getElementById("otp-form").style.display = "block";
+      }).catch(function(error) {
+        document.getElementById("result").innerText = "Error: " + error.message;
+      });
+  }
+});
 
-        let confirmationResult;
+document.getElementById("verifyOtpBtn").addEventListener("click", function() {
+  const otp = document.getElementById("otp").value;
+  window.confirmationResult.confirm(otp)
+    .then(function(result) {
+      // User signed in successfully.
+      const user = result.user;
+      document.getElementById("result").innerText = "OTP Verified. User: " + user.phoneNumber;
+    }).catch(function(error) {
+      document.getElementById("result").innerText = "Error: " + error.message;
+    });
+});
 
-        // Send OTP to the user's phone number
-        sendOtpBtn.addEventListener('click', () => {
-            const phoneNumber = phoneNumberInput.value;
-
-            signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-                .then((result) => {
-                    confirmationResult = result;
-                    statusText.textContent = "OTP sent successfully!";
-                })
-                .catch((error) => {
-                    console.error("Error during signInWithPhoneNumber:", error);
-                    statusText.textContent = "Failed to send OTP: " + error.message;
-                });
-        });
-
-        // Verify the OTP entered by the user
-        verifyOtpBtn.addEventListener('click', () => {
-            const otp = otpInput.value;
-
-            confirmationResult.confirm(otp)
-                .then((result) => {
-                    const user = result.user;
-                    statusText.textContent = "User signed in successfully!";
-                    console.log("User signed in:", user);
-                })
-                .catch((error) => {
-                    console.error("Error during OTP verification:", error);
-                    statusText.textContent = "Failed to verify OTP: " + error.message;
-                });
-        });
-
-        // Monitor authentication state
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                console.log("User is signed in:", user);
-            } else {
-                console.log("No user is signed in.");
-            }
-        });
 
     </script>
 </body>
