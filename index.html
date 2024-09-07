@@ -114,9 +114,16 @@ function verify() {
         const database = firebase.database();
 
         function render() {
-            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
-            recaptchaVerifier.render();
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        'size': 'invisible', // This makes it invisible
+        'callback': function(response) {
+            // reCAPTCHA solved automatically
+            login();
         }
+    });
+    recaptchaVerifier.render();
+}
+
 
         function login() {
             var mobile = document.getElementById("mobilenum").value;
