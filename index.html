@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firebase OTP Authentication</title>
 </head>
+
 <body>
     <h1>Firebase OTP Authentication</h1>
 
@@ -14,13 +16,13 @@
         <input type="text" id="phoneNumber" placeholder="+911234567890" required>
         <button type="button" id="sendOtpBtn">Send OTP</button>
     </form>
-    
+
     <form id="otp-form" style="display:none;">
         <label for="otp">Enter OTP:</label>
         <input type="text" id="otp" placeholder="123456" required>
         <button type="button" id="verifyOtpBtn">Verify OTP</button>
     </form>
-    
+
     <div id="recaptcha-container"></div>
     <div id="result"></div>
 
@@ -30,7 +32,7 @@
         // Import Firebase app and auth
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-      
+
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBMIXxBISZnryQeOgKRs73TqVRXkshd0KM",
@@ -40,59 +42,68 @@
             messagingSenderId: "397386970252",
             appId: "1:397386970252:web:d6bdefc39cf239c56d77a9"
         };
-      
+
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-      
+
         let recaptchaVerifier; // Declare recaptchaVerifier outside the event listener
 
         // Sending OTP
-        document.getElementById("sendOtpBtn").addEventListener("click", async function() {
-          const phoneNumber = document.getElementById("phoneNumber").value;
-          
-          // Initialize the RecaptchaVerifier
-          recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-            'size': 'invisible', // Use 'normal' for visible reCAPTCHA or 'invisible' for auto-validation
-            'callback': (response) => {
-              // reCAPTCHA solved, allow send OTP
-              sendOtp(phoneNumber);
-            }
-          }, auth);
-      
-          // Render reCAPTCHA
-          try {
-            await recaptchaVerifier.render();
-          } catch (error) {
-            document.getElementById("result").innerText = "Error rendering reCAPTCHA: " + error.message;
-          }
-      
-          // Function to send OTP
-          async function sendOtp(phoneNumber) {
+        document.getElementById("sendOtpBtn").addEventListener("click", async function () {
+            const phoneNumber = document.getElementById("phoneNumber").value;
+
+            // Initialize the RecaptchaVerifier
+            const recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+                size: 'invisible',
+                callback: (response) => {
+                    // reCAPTCHA solved, allow sending OTP
+                    sendOtp();
+                }
+            }, auth);
+
+            // Render reCAPTCHA
             try {
-              const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-              window.confirmationResult = confirmationResult;
-              document.getElementById("phone-form").style.display = "none";
-              document.getElementById("otp-form").style.display = "block";
-              document.getElementById("result").innerText = "OTP sent successfully.";
+                await recaptchaVerifier.render();
             } catch (error) {
-              document.getElementById("result").innerText = "Error sending OTP: " + error.message;
+                document.getElementById("result").innerText = "Error rendering reCAPTCHA: " + error.message;
             }
-          }
+
+            // Function to send OTP
+            async function sendOtp() {
+                const phoneNumber = document.getElementById("phoneNumber").value;
+                try {
+                    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+                    window.confirmationResult = confirmationResult;
+                    document.getElementById("phone-form").style.display = "none";
+                    document.getElementById("otp-form").style.display = "block";
+                    document.getElementById("result").innerText = "OTP sent successfully.";
+                } catch (error) {
+                    document.getElementById("result").innerText = "Error sending OTP: " + error.message;
+                }
+            }
         });
-      
+
         // Verifying OTP
-        document.getElementById("verifyOtpBtn").addEventListener("click", async function() {
-          const otp = document.getElementById("otp").value;
-          try {
-            const result = await window.confirmationResult.confirm(otp);
-            const user = result.user;
-            document.getElementById("result").innerText = "OTP Verified. User: " + user.phoneNumber;
-          } catch (error) {
-            document.getElementById("result").innerText = "Error verifying OTP: " + error.message;
-          }
+        document.getElementById("verifyOtpBtn").addEventListener("click", async function () {
+            const otp = document.getElementById("otp").value;
+            try {
+                const result = await window.confirmationResult.confirm(otp);
+                const user = result.user;
+                document.getElementById("result").innerText = "OTP Verified. User: " + user.phoneNumber;
+            } catch (error) {
+                document.getElementById("result").innerText = "Error verifying OTP: " + error.message;
+            }
+        });
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                console.log('User is logged in:', user);
+            } else {
+                console.log('No user is logged in');
+            }
         });
     </script>
-  
+
 </body>
+
 </html>
