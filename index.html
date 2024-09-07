@@ -1,45 +1,106 @@
+<!-- <script>
+    window.onload = function() {
+    render()
+}
+
+const firebaseConfig = {
+    apiKey: "AIzAsyBiVvS8QHo1kINQqdyg7YMZ-il5kNMeI3hfE",
+    authDomain: "login-f0577.firebaseapp.com",
+    projectId: "login-f0577",
+    storageBucket: "login-f0577.appspot.com",
+    messagingSenderId: "486293576773",
+    appId: "1:486293576773:web:e46268abbd5554df06140c"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+
+function render() {
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+    recaptchaVerifier.render();
+}
+
+
+function login() {
+    var mobile = document.getElementById("mobilenum").value
+    console.log(mobile)
+    var number = "+91" + mobile;
+    console.log(number)
+    if (mobile.length < 10) {
+        window.alert("Enter correct mobile number")
+    } else {
+        firebase.auth().signInWithPhoneNumber(number, window.recaptchaVerifier).then(function (confirmResult) {
+            window.confirmResult = confirmResult;
+            coderesult = confirmResult;
+            console.log(coderesult);
+
+            var a = document.getElementById("mobileenter")
+            a.remove();
+
+            document.getElementById("optenter").style.visibility = "visible";
+        }).catch(function (error) {
+            document.getElementById("error").innerHTML = error.message;
+        });
+    }
+}
+
+function verify() {
+    var otp = document.getElementById("otpvalue").value;
+    coderesult.confirm(otp).then(function (result) {
+        var user = result.user;
+        window.location.replace("user.html");
+    }).catch(function (error) {
+        document.getElementById("errorotp").innerHTML = error.message;
+    });
+}
+</script> -->
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase OTP Authentication</title>
+    <title>Phone Authentication</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <style>
+        #optenter {
+            visibility: hidden;
+        }
+        #error, #errorotp {
+            color: red;
+        }
+    </style>
 </head>
-
 <body>
-    <h1>Firebase OTP Authentication</h1>
-
-    <!-- Input fields for phone number and OTP -->
-    <div>
-        <label for="phoneNumber">Phone Number:</label>
-        <input type="text" id="phoneNumber" placeholder="+1234567890">
-        <button id="sendOtpBtn">Send OTP</button>
+    <h2>Phone Number Authentication</h2>
+    
+    <!-- Mobile number input -->
+    <div id="mobileenter">
+        <label for="mobilenum">Enter Mobile Number:</label>
+        <input type="text" id="mobilenum" placeholder="Enter 10-digit mobile number">
+        <div id="recaptcha-container"></div>
+        <button onclick="login()">Send OTP</button>
+        <p id="error"></p>
     </div>
-
-    <div>
-        <label for="otp">Enter OTP:</label>
-        <input type="text" id="otp" placeholder="123456">
-        <button id="verifyOtpBtn">Verify OTP</button>
+    
+    <!-- OTP input -->
+    <div id="optenter">
+        <label for="otpvalue">Enter OTP:</label>
+        <input type="text" id="otpvalue" placeholder="Enter OTP">
+        <button onclick="verify()">Verify OTP</button>
+        <p id="errorotp"></p>
     </div>
+    
+    <script>
+        window.onload = function() {
+            render();
+        }
 
-    <p id="status"></p>
-
-    <!-- Invisible reCAPTCHA container -->
-    <div id="recaptcha-container"></div>
-
-    <!-- Firebase SDKs -->
-    <script type="module">
-        // <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js">
-        // <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js">
-     
-
-  // Import Firebase functions (ensure you're using type="module" in your script tag)
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
-import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
-
-// Firebase configuration
-const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyBMIXxBISZnryQeOgKRs73TqVRXkshd0KM",
   authDomain: "krinkin-309ee.firebaseapp.com",
   projectId: "krinkin-309ee",
@@ -48,68 +109,40 @@ const firebaseConfig = {
   appId: "1:397386970252:web:9655f412b4280a036d77a9"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
 
-// Setup reCAPTCHA
-const appVerifier = new RecaptchaVerifier('recaptcha-container', {
-  'size': 'invisible',
-  'callback': (response) => {
-    // reCAPTCHA solved, allow user to send OTP
-  }
-}, auth);
+        function render() {
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+            recaptchaVerifier.render();
+        }
 
-// DOM elements
-const phoneNumberInput = document.getElementById('phoneNumber');
-const otpInput = document.getElementById('otp');
-const sendOtpBtn = document.getElementById('sendOtpBtn');
-const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-const statusText = document.getElementById('status');
+        function login() {
+            var mobile = document.getElementById("mobilenum").value;
+            var number = "+91" + mobile;
+            if (mobile.length < 10) {
+                window.alert("Enter correct mobile number");
+            } else {
+                firebase.auth().signInWithPhoneNumber(number, window.recaptchaVerifier).then(function (confirmResult) {
+                    window.confirmResult = confirmResult;
+                    document.getElementById("mobileenter").remove();
+                    document.getElementById("optenter").style.visibility = "visible";
+                }).catch(function (error) {
+                    document.getElementById("error").innerHTML = error.message;
+                });
+            }
+        }
 
-let confirmationResult;
-
-// Send OTP to the user's phone number
-sendOtpBtn.addEventListener('click', () => {
-    const phoneNumber = phoneNumberInput.value;
-
-    signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-        .then((result) => {
-            confirmationResult = result;
-            statusText.textContent = "OTP sent successfully!";
-        })
-        .catch((error) => {
-            console.error("Error during signInWithPhoneNumber:", error);
-            statusText.textContent = "Failed to send OTP: " + error.message;
-        });
-});
-
-// Verify the OTP entered by the user
-verifyOtpBtn.addEventListener('click', () => {
-    const otp = otpInput.value;
-
-    confirmationResult.confirm(otp)
-        .then((result) => {
-            const user = result.user;
-            statusText.textContent = "User signed in successfully!";
-            console.log("User signed in:", user);
-        })
-        .catch((error) => {
-            console.error("Error during OTP verification:", error);
-            statusText.textContent = "Failed to verify OTP: " + error.message;
-        });
-});
-
-// Monitor authentication state
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        console.log("User is signed in:", user);
-    } else {
-        console.log("No user is signed in.");
-    }
-});
-
+        function verify() {
+            var otp = document.getElementById("otpvalue").value;
+            coderesult.confirm(otp).then(function (result) {
+                var user = result.user;
+                window.location.replace("user.html");
+            }).catch(function (error) {
+                document.getElementById("errorotp").innerHTML = error.message;
+            });
+        }
     </script>
 </body>
-
 </html>
